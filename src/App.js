@@ -1,26 +1,59 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import ViewTable from './components/ViewTable';
+class App extends React.Component {
+    constructor(){
+        super();
+        this.state = {stockData : []};
+    }
+    updatedStockData = {};
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    componentDidMount() {
+        const socket = new WebSocket('ws://stocks.mnet.website');
+        socket.addEventListener('open',(event)=>{
+            socket.send('Hello Server !');
+        });
+        socket.addEventListener('message', (event)=>{
+            this.handleStockUpdate(event.data);
+        });
+    }
+
+    handleStockUpdate(updatedData) {
+        updatedData = JSON.parse(updatedData);
+        updatedData.forEach((stock) => {
+            this.updatedStockData[stock[0]] = {price : stock[1], lastUpdated: new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"})};
+            if(this.state.stockData[stock[0]]) {
+                if(this.state.stockData[stock[0]].price > this.updatedStockData[stock[0]].price) {
+                    this.updatedStockData[stock[0]].change = 'negative';
+                }
+                else {
+                    this.updatedStockData[stock[0]].change = 'positive';
+                }
+
+            }
+        });
+        this.setState({ stockData: JSON.parse(JSON.stringify(this.updatedStockData)) });
+    }
+    render() {
+        return(
+            <div className ='ui container'>
+                <h2 className='ui header center aligned orange'>Stock Data</h2>
+                <table className='ui celled table center aligned unstackable'>
+                    <thead>
+                    <tr>
+                        <th>Stock Name</th>
+                        <th>Price</th>
+                        <th>Last Updated</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <ViewTable stockList = {this.state.stockData} />
+                    </tbody>
+                </table>
+            </div>
+
+        );
+    }
 }
 
 export default App;

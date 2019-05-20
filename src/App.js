@@ -9,7 +9,8 @@ class App extends React.Component {
     updatedStockData = {};
 
     componentDidMount() {
-        const socket = new WebSocket('ws://stocks.mnet.website');
+        let url = 'ws://stocks.mnet.website';
+        const socket = new WebSocket(`${url}`);
         socket.addEventListener('open',(event)=>{
             socket.send('Hello Server !');
         });

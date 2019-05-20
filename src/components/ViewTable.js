@@ -1,7 +1,6 @@
 import React from 'react';
 
 const ViewTable = (props) => {
-    console.log(props.stockList);
     let tr = Object.keys(props.stockList).map((stockItem, i) => {
         return (
             <tr key={i} className={props.stockList[stockItem].change}>
